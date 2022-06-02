@@ -1,11 +1,12 @@
 package br.com.agrozonfra.services;
 
 import br.com.agrozonfra.entity.Cliente;
-import br.com.agrozonfra.exceptionhandler.ClienteNotFoundException;
 import br.com.agrozonfra.repository.ClienteRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,14 +27,14 @@ public class ClienteService {
 
     public Cliente findById (Long id){
         Optional<Cliente> cliente = clienteRepository.findById(id);
-        return cliente.orElseThrow(() -> new ClienteNotFoundException());
+        return clienteRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     public Cliente updateCliente(Cliente cliente, Long id){
         findById(id);
-        Cliente updateCliente = clienteRepository.getById(id);
-        BeanUtils.copyProperties(cliente, updateCliente, "id");
-        return clienteRepository.save(updateCliente);
+        cliente.setId(id);
+        return clienteRepository.save(cliente);
     }
 
     public void deleteCliente(Long id){
